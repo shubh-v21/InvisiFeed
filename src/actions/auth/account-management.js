@@ -19,11 +19,11 @@ export async function deleteUserAccount() {
 
     await dbConnect();
 
-    // Find account by email - only fetch _id
+    // Find account by email - fetch _id and email
     const account = await AccountModel.findOne({
       email: session.user.email,
     })
-      .select('_id')
+      .select("_id email")
       .lean();
 
     if (!account) {
@@ -34,7 +34,7 @@ export async function deleteUserAccount() {
     const business = await BusinessModel.findOne({
       account: account._id,
     })
-      .select('_id')
+      .select("_id")
       .lean();
 
     if (!business) {

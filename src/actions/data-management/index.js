@@ -8,6 +8,7 @@ import { authOptions } from "@/lib/auth/options";
 import FeedbackModel from "@/models/feedback";
 import InvoiceModel from "@/models/invoice";
 import RecommendedActionModel from "@/models/recommended-action";
+import DeletedAccountModel from "@/models/deleted-account";
 
 export async function resetData() {
   try {
@@ -21,7 +22,7 @@ export async function resetData() {
 
     // Find account by username - only fetch _id
     const account = await AccountModel.findOne({ username })
-      .select('_id')
+      .select("_id")
       .lean();
 
     if (!account) {
@@ -32,7 +33,7 @@ export async function resetData() {
     const business = await BusinessModel.findOne({
       account: account._id,
     })
-      .select('_id')
+      .select("_id")
       .lean();
 
     if (!business) {
@@ -71,11 +72,11 @@ export async function deleteAccount() {
       return { success: false, message: "Unauthorized" };
     }
 
-    // Find account by email - only fetch _id
+    // Find account by email - fetch _id and email
     const account = await AccountModel.findOne({
       email: session.user.email,
     })
-      .select('_id')
+      .select("_id email")
       .lean();
 
     if (!account) {
@@ -86,18 +87,15 @@ export async function deleteAccount() {
     const business = await BusinessModel.findOne({
       account: account._id,
     })
-      .select('_id')
+      .select("_id")
       .lean();
 
     if (!business) {
       return { success: false, message: "Business not found" };
     }
 
-    const DeletedAccountModel = (await import("@/models/deleted-account"))
-      .default;
-
     const deletedAccount = await DeletedAccountModel.create({
-      email: account.email,
+      email: session.user.email,
       deletionDate: new Date(),
     });
 
@@ -119,4 +117,3 @@ export async function deleteAccount() {
     return { success: false, message: "Internal server error" };
   }
 }
-
