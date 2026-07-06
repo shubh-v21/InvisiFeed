@@ -47,20 +47,17 @@ export async function extractInvoiceNumberFromPdf(file) {
     try {
       const extractedData = JSON.parse(cleanedText);
       
-      // Clean up total amount to ensure it's a pure number
-      if (extractedData.totalAmount && extractedData.totalAmount !== "Not Found") {
-        // Remove any currency symbols, commas, and whitespace
-        extractedData.totalAmount = extractedData.totalAmount
-          .replace(/[^\d.-]/g, '') // Remove everything except digits, decimal point, and minus sign
-          .replace(/^0+/, '') // Remove leading zeros
-          .replace(/^\./, '0.') // Add leading zero if starts with decimal point
-          .replace(/\.$/, '') // Remove trailing decimal point
-          .replace(/\.(?=.*\.)/g, ''); // Remove all but last decimal point
-        
-        // If the result is empty or invalid, set to "Not Found"
-        if (!extractedData.totalAmount || isNaN(extractedData.totalAmount)) {
-          extractedData.totalAmount = "Not Found";
-        }
+      // Clean up total amount to ensure it's a pure number (Gemini may return number or string)
+      if (extractedData.totalAmount != null && extractedData.totalAmount !== "Not Found") {
+        const amountStr = String(extractedData.totalAmount)
+          .replace(/[^\d.-]/g, "") // Remove everything except digits, decimal point, and minus sign
+          .replace(/^0+(?=\d)/, "") // Remove leading zeros
+          .replace(/^\./, "0.") // Add leading zero if starts with decimal point
+          .replace(/\.$/, "") // Remove trailing decimal point
+          .replace(/\.(?=.*\.)/g, ""); // Remove all but last decimal point
+
+        extractedData.totalAmount =
+          !amountStr || isNaN(Number(amountStr)) ? "Not Found" : amountStr;
       }
       
       return extractedData;
