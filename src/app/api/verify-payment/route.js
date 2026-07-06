@@ -1,15 +1,9 @@
 import { NextResponse } from "next/server";
-import Razorpay from "razorpay";
 import crypto from "crypto";
 import dbConnect from "@/lib/dbConnect";
 import OwnerModel from "@/models/Owner";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/options";
-
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
 
 export async function POST(req) {
   try {
